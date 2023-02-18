@@ -1,55 +1,60 @@
 import {defineHook} from '@directus/extensions-sdk';
-import {readFile} from 'node:fs/promises';
-import {load as loadYaml} from 'js-yaml';
-import {glob as globCB} from 'glob';
-import {promisify} from "util";
+import {readFile, writeFile} from 'node:fs/promises';
+import {load as loadYaml, dump as dumpYaml} from 'js-yaml';
 
 
-export default defineHook(async ({init}, {services, getSchema, database, env, logger}) => {
-    const SEED_FILES = env.SEED_FILES;
-    const glob = promisify(globCB);
-
+export default defineHook(async ({init}, {services, getSchema, database, logger}) => {
     const accountability = {
         admin: true
     };
 
-    init('app.before', async () => {
-        if (!SEED_FILES) {
-            logger.info('SEED_FILES is not set, skipping seeding');
-            return;
-        }
-        const sourceFiles = (await Promise.all(
-            SEED_FILES
-                .split(':')
-                .map((pattern: string) => glob(pattern))
-        ))
-            .flatMap(set => set)
-            .sort();
+    async function importFile(sourceFile: string) {
+        const fileContents = await readFile(sourceFile, 'utf8');
+        const dataSource = loadYaml(fileContents) as Record<string, any>;
 
-        if (sourceFiles.length === 0) {
-            logger.warn('No seed files found');
-            return;
-        } else {
-            logger.info(`Found ${sourceFiles.length} seed files:`);
-            sourceFiles.forEach((file: string) => {
-                logger.info(` - ${file}`);
+        for (let collectionName in dataSource) {
+            const collection = new services.ItemsService(collectionName, {
+                knex: database,
+                schema: await getSchema(),
+                accountability,
             });
+
+            const results = await collection.upsertMany(dataSource[collectionName]);
+            logger.info(`Upserted ${results.length} items into ${collectionName}`);
         }
+    }
 
-        for (let sourceFile of sourceFiles) {
-            const fileContents = await readFile(sourceFile, 'utf8');
-            const dataSource = loadYaml(fileContents) as Record<string, any>;
+    init('cli.after', ({program}: any) => {
 
-            for (let collectionName in dataSource) {
-                const collection = new services.ItemsService(collectionName, {
-                    knex: database,
-                    schema: await getSchema(),
-                    accountability,
-                });
+        const dataCommand = program.command('data');
+        dataCommand
+            .command('apply')
+            .description('Seed .yaml files into your database.')
+            .argument('<files...>')
+            .action(async function (files: string[]) {
+                for (let file of files) {
+                    await importFile(file);
+                }
+            });
+        dataCommand
+            .command('snapshot')
+            .description('Dump a table to a file')
+            .requiredOption('-o, --output <targetFile>', 'The target output file')
+            .argument('<collections...>')
+            .action(async function (collections: string[], opts: any) {
+                const data: Record<string, any[]> = {};
 
-                const results = await collection.upsertMany(dataSource[collectionName]);
-                logger.info(`Upserted ${results.length} items into ${collectionName}`);
-            }
-        }
+                for (let collectionName of collections) {
+                    const collection = new services.ItemsService(collectionName, {
+                        knex: database,
+                        schema: await getSchema(),
+                        accountability,
+                    });
+                    data[collectionName] = await collection.readByQuery({});
+                }
+                const yamlData = dumpYaml(data);
+                await writeFile(opts.output, yamlData);
+                process.exit(0);
+            });
     });
 });

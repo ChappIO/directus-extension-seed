@@ -1,13 +1,13 @@
-# Directus Extension: Seed
+# Directus CLI Extension: Seed
 
 **Note:** This extension is very much under development.
 Use at own risk.
 
-Seed your directus instance from .yml files on boot.
+Seed your directus instance from .yml files from the CLI.
 
 ## Usage:
 
-1. Add `SEED_FILES=*.seed.yml` to your configuration
+1. Install the extension: `npm install directus-extension-seed`.
 2. Create your seed file: `00_directus_settings.yml`:
    ```yaml
    # This key is the collection to import into
@@ -18,6 +18,7 @@ Seed your directus instance from .yml files on boot.
        project_url: https://thing.com
        project_color: #7B219F
    ```
+3. Run `directus data snapshot ./path/to/your/file.yml`
 
 Essentially, the .yml file contains your collection data which should be upserted.
 Note that primary keys are required as they are used to determine if the image should be updated or added.

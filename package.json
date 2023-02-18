@@ -2,7 +2,7 @@
 	"name": "directus-extension-seed",
 	"description": "Seed your Directus instance using upserts from .yaml files",
 	"icon": "extension",
-	"version": "1.0.2",
+	"version": "2.0.0",
 	"keywords": [
 		"directus",
 		"directus-extension",
@@ -25,7 +25,6 @@
 	},
 	"devDependencies": {
 		"@directus/extensions-sdk": "9.22.4",
-		"@types/glob": "^8.0.1",
 		"@types/js-yaml": "^4.0.5",
 		"@types/node": "^18.13.0",
 		"js-yaml": "^4.1.0",
