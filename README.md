@@ -18,11 +18,15 @@ Seed your directus instance from .yml files from the CLI.
        project_url: https://thing.com
        project_color: #7B219F
    ```
-3. Run `directus data snapshot ./path/to/your/file.yml`
+3. Run `directus data apply ./path/to/your/file.yml`
 
 Essentially, the .yml file contains your collection data which should be upserted.
 Note that primary keys are required as they are used to determine if the image should be updated or added.
 
+## Dumping data
+
+1. Install the extension: `npm install directus-extension-seed`.
+2. Run `directus data snapshot --output <targetFile> <collections...>` (For example: `directus data snapshot --output dump.yml directus_settings`)
 
 ## Some Examples:
 
