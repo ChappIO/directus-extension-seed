@@ -22,6 +22,7 @@ export default defineHook(async ({init}, {services, getSchema, database, logger}
             const results = await collection.upsertMany(dataSource[collectionName]);
             logger.info(`Upserted ${results.length} items into ${collectionName}`);
         }
+        process.exit(0);
     }
 
     init('cli.after', ({program}: any) => {
