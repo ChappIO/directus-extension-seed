@@ -51,7 +51,7 @@ export default defineHook(async ({init}, {services, getSchema, database, logger}
                         schema: await getSchema(),
                         accountability,
                     });
-                    data[collectionName] = await collection.readByQuery({});
+                    data[collectionName] = await collection.readByQuery({ limit: -1 });
                 }
                 const yamlData = dumpYaml(data);
                 await writeFile(opts.output, yamlData);
