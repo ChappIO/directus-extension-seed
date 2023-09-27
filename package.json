@@ -2,7 +2,7 @@
 	"name": "directus-extension-seed",
 	"description": "Seed your Directus instance using upserts from .yaml files",
 	"icon": "extension",
-	"version": "2.0.3",
+	"version": "2.0.4",
 	"keywords": [
 		"directus",
 		"directus-extension",
