@@ -16,7 +16,7 @@ Seed your directus instance from .yml files from the CLI.
      - id: 1
        project_name: My Backoffice
        project_url: https://thing.com
-       project_color: #7B219F
+       project_color: "#7B219F"
    ```
 3. Run `directus data apply ./path/to/your/file.yml`
 
